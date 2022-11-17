@@ -1,0 +1,259 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Simple NodeJS API",
+    "description": "A simple NodeJS API",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Abel Tefera",
+      "email": "abeltefera16@gmail.com"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Users / Balance API",
+      "description": "API for users in the system"
+    }
+  ],
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Register"],
+        "summary": "Register a User",
+        "parameters": [
+          {
+            "name": "User",
+            "in": "body",
+            "description": "User that we want to create",
+            "schema": {
+              "required": ["name", "password"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "uniqueItems": true
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "message": "User successfully created",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "message": "User creation failed",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "message": "Server error message",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Login"],
+        "summary": "User Sign-In",
+        "parameters": [
+          {
+            "name": "User",
+            "in": "body",
+            "description": "User that we want to log in as",
+            "schema": {
+              "required": ["name", "password"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "uniqueItems": true
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "message": "Login successful",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "message": "Name or Password not present",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "message": "Login not successful",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "message": "Server error message",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api/balance/send": {
+      "post": {
+        "tags": ["Send Coins"],
+        "summary": "Send coins for user",
+        "parameters": [
+          {
+            "name": "Send Coins",
+            "in": "body",
+            "description": "Balance we want to send for a user",
+            "schema": {
+              "required": ["sendTo", "coins"],
+              "properties": {
+                "sendTo": {
+                  "type": "string"
+                },
+                "coins": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT access token (Starts with Bearer)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "message": "Successfully sent coins to user"
+          },
+          "400": {
+            "message": "Coins should be a positive integer / User not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "message": "Not authorized, no token / invalid token",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "500": {
+            "message": "Server error message",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    },
+    "/api/balance/check": {
+      "get": {
+        "tags": ["Check Balance"],
+        "summary": "Check account balance",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Your available balance is 100 coins"
+                }
+              }
+            }
+          },
+          "400": {
+            "message": "User not found",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "401": {
+            "message": "Not authorized, no token / invalid token",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        },
+        "security": [{ "bearerAuth": [] }]
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "required": ["name", "password"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "uniqueItems": true
+        },
+        "password": {
+          "type": "string"
+        },
+        "coinBalance": {
+          "type": "integer"
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "Error": {
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
